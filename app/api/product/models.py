@@ -17,6 +17,7 @@ class Product(Base):
     image = Column(String(255), index=True)
 # Define the relationship with Inventory
     inventory = relationship('Inventory', cascade='all, delete-orphan')
+
 # Try to create tables using the defined models and bind them to the engine
 try:
     Base.metadata.create_all(bind=engine)

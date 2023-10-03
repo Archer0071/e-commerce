@@ -50,7 +50,7 @@ async def create_product(product: CreateProduct, db: Session = Depends(get_db)):
 @router.delete('/delete/{product_id}',response_model=GetProduct)
 def delete_product(product_id,db:Session = Depends(get_db)):
     """
-    Delete a product
+    Delete a product (deleting the product will also delete corresponding inventory and its history)
     
     Args:
         product_id (int): ID of the product to be deleted

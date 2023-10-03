@@ -19,9 +19,6 @@ def delete_product(db: Session, product:models.Product):
     db.commit()
     return {"ok": True}
 
-
-
-
 # Function to create a product image
 def upload_product_image(db:Session,image:UploadFile,product:models.Product):
     if image:
@@ -34,6 +31,7 @@ def upload_product_image(db:Session,image:UploadFile,product:models.Product):
         db.commit()
         db.refresh(product)
         return product
+    
 # Function to retrieve all products
 def get_all_products(db: Session):
     return db.query(models.Product).all()
