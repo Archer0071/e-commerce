@@ -1,16 +1,47 @@
-# app/api/product/schemas.py
-
 from pydantic import BaseModel
+from models import Category
+from datetime import datetime
+from typing import Optional
 
-class ProductBase(BaseModel):
+# -------------------------- Product Schemas --------------------------------
+
+class CreateProduct(BaseModel):
+    """
+    schema for creating a new product.
+
+    Attributes:
+        name (str): Name of the product.
+        description (str, optional): Description of the product (default is an empty string).
+        price (float): Price of the product.
+        quantity (int): Initial quantity of the product in inventory.
+        category (Category): Category of the product.
+        image (Optional[str]): Image URL or file path of the product (optional).
+    """
     name: str
-    description: str = None
+    description: str = ""
+    price: float
+    quantity: int
+    category: Category
+    image: Optional[str]
 
-class ProductCreate(ProductBase):
-    pass
+class GetProduct(BaseModel):
+    """
+    schema for getting details of a product.
 
-class Product(ProductBase):
+    Attributes:
+        id (int): Unique identifier for the product.
+        name (str): Name of the product.
+        description (str, optional): Description of the product (default is an empty string).
+        price (float): Price of the product.
+        quantity (int): Current quantity of the product in inventory.
+        category (Category): Category of the product.
+        image (Optional[str]): Image URL or file path of the product (optional).
+    """
     id: int
-
-    class Config:
-        orm_mode = True
+    name: str
+    description: str = ""
+    price: float
+    quantity: int
+    category: Category
+    image: Optional[str]
+    

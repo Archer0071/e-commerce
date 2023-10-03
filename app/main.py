@@ -1,8 +1,8 @@
 import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from api.product import endpoints as product_endpoints
-from api.inventory import enpoints as inventory_enpoints
+from app.api.product import endpoints as product_endpoints
+from app.api.inventory import endpoints as inventory_enpoints
 from api.sales import endpoints as sales_endpoints
 
 app = FastAPI()
