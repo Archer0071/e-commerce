@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from db.session import get_db
-from api.inventory.cruds import *
-from api.inventory.schemas import GetInventory,UpdateInventory
+from api.inventory import cruds as inventory_cruds
+from api.inventory.schemas import GetInventory,UpdateInventory,PaginatedInventory
 
 
 router = APIRouter()
@@ -21,10 +21,13 @@ async def get_all_inventory(db: Session = Depends(get_db)):
     Returns:
         List[GetInventory]: List of inventory items.
     """
-    return get_all_inventory(db)
+    return inventory_cruds.get_all_inventory(db)
 
-@router.get("/inventory/{inventory_id}")
-async def get_inventory_history_by_id(inventory_id:int,db: Session = Depends(get_db)):
+@router.get("/inventory_history/{inventory_id}",response_model=PaginatedInventory)
+async def get_inventory_history(inventory_id:int,
+                                page: int = Query(1, ge=1),
+                                per_page: int = Query(10, ge=1),
+                                db: Session = Depends(get_db)):
     """
     Get all inventory history items.
 
@@ -34,11 +37,8 @@ async def get_inventory_history_by_id(inventory_id:int,db: Session = Depends(get
     Returns:
         List[GetInventory]: List of inventory history items.
     """
-    inventory = get_inventory_history_by_id(db,inventory_id)
-    if inventory is None:
-        raise HTTPException(404, detail="Inventory not found")
-
-    return inventory
+    
+    return inventory_cruds.get_inventory_history(db,inventory_id,page,per_page)
 
 @router.patch("/inventory/{inventory_id}", response_model=GetInventory)
 async def update_inventory(
@@ -57,10 +57,10 @@ async def update_inventory(
     Returns:
         GetInventory: Updated inventory item.
     """
-    existing_inventory = get_inventory_by_id(db, inventory_id)
+    existing_inventory = inventory_cruds.get_inventory_by_id(db, inventory_id)
 
     if not existing_inventory:
         raise HTTPException(404, detail="Inventory not found")
 
-    updated_inventory = update_inventory(db, inventory_id, update_data)
+    updated_inventory = inventory_cruds.update_inventory(db, inventory_id, update_data)
     return updated_inventory

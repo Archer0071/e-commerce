@@ -1,7 +1,7 @@
+from typing import List,TypeVar,Generic
 from pydantic import BaseModel
 from api.inventory.models import InventoryStatus
 from datetime import datetime
-from typing import Optional
 
 
 # ----------------------------------- Inventory Schemas ----------------------------------
@@ -46,3 +46,18 @@ class UpdateInventory(BaseModel):
     """
     quantity: int
     status: InventoryStatus
+
+
+class GetInventoryHistory(BaseModel):
+    id : int
+    inventory_id : int
+    quantity : int
+    last_updated : datetime
+    status : InventoryStatus
+
+T = TypeVar('T')
+class PaginatedInventory(BaseModel):
+    page_number: int
+    total_pages: int
+    items: List[T]
+    

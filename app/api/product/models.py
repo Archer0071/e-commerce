@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Float, Integer, String
 from sqlalchemy.types import Enum as SQLAlchemyEnum
+from sqlalchemy.orm import relationship
 from utils.enums import Category
 from db.base import Base
 from db.session import engine
@@ -14,7 +15,8 @@ class Product(Base):
     price = Column(Float, index=True)
     category = Column(SQLAlchemyEnum(Category), nullable=False)
     image = Column(String(255), index=True)
-
+# Define the relationship with Inventory
+    inventory = relationship('Inventory', cascade='all, delete-orphan')
 # Try to create tables using the defined models and bind them to the engine
 try:
     Base.metadata.create_all(bind=engine)

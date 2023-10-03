@@ -14,6 +14,13 @@ def create_product(db: Session, product_data):
     db.refresh(db_product)
     return db_product
 
+def delete_product(db: Session, product:models.Product):
+    db.delete(product)
+    db.commit()
+    return {"ok": True}
+
+
+
 
 # Function to create a product image
 def upload_product_image(db:Session,image:UploadFile,product:models.Product):

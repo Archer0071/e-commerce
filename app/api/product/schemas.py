@@ -21,7 +21,6 @@ class CreateProduct(BaseModel):
     price: float
     quantity: int
     category: Category
-    image: Optional[str]
 
 class GetProduct(BaseModel):
     """
@@ -40,7 +39,6 @@ class GetProduct(BaseModel):
     name: str
     description: str = ""
     price: float
-    quantity: int
     category: Category
-    image: Optional[str]
+    image: Optional[str] = None
     

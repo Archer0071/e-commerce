@@ -9,7 +9,7 @@ from db.session import engine
 class Inventory(Base):
     __tablename__ = "inventory"
     id = Column(Integer, primary_key=True, index=True)
-    product = Column(ForeignKey("products.id"))
+    product = Column(ForeignKey("products.id", ondelete='CASCADE'))
     quantity = Column(Integer)
     last_updated = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
     status = Column(SQLAlchemyEnum(InventoryStatus), nullable=False)
@@ -18,7 +18,7 @@ class Inventory(Base):
 class InventoryHistory(Base):
     __tablename__ = "inventory_history"
     id = Column(Integer, primary_key=True, index=True)
-    inventory_id = Column(ForeignKey("inventory.id"))
+    inventory_id = Column(ForeignKey("inventory.id", ondelete='CASCADE'))
     quantity = Column(Integer)
     last_updated = Column(DateTime(timezone=True), default=func.now())
     status = Column(SQLAlchemyEnum(InventoryStatus), nullable=False)

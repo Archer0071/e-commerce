@@ -27,5 +27,6 @@ if environment != "production":
 app.include_router(product_endpoints.router, prefix="/products", tags=["Products"])
 app.include_router(inventory_enpoints.router, prefix="/inventory", tags=["Inventory"])
 
+
 if __name__ == '__main__':
     uvicorn.run(app)

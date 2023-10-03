@@ -1,5 +1,8 @@
+import math
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from api.inventory import models
+from api.inventory.schemas import GetInventoryHistory,PaginatedInventory
 
 
 # ---------------------------- Inventory Functions ---------------------------------------
@@ -23,12 +26,22 @@ def get_inventory_by_id(db: Session, inventory_id: int):
     return db.query(models.Inventory).filter(models.Inventory.id == inventory_id).first()
 
 # function to retrieve an inventory item history by its Id
-def get_inventory_history_by_id(db:Session, inventory_id):
-    return db.query(models.InventoryHistory).filter(models.InventoryHistory.inventory_id == inventory_id).all()
+def get_inventory_history(db:Session, inventory_id,  page,per_page):
+    limit = per_page * page
+    offset = (page - 1) * per_page
+    items = [GetInventoryHistory(id= item.id,
+                                inventory_id=item.inventory_id,
+                                quantity=item.quantity,
+                                last_updated=item.last_updated,
+                                status=item.status) for item in db.scalars(select(models.InventoryHistory).where(models.InventoryHistory.inventory_id == inventory_id).limit(limit).offset(offset).order_by(models.InventoryHistory.id.desc()))]
+    items_list  = db.query(models.InventoryHistory).filter(models.InventoryHistory.inventory_id == inventory_id).all()
+    total = math.ceil(len(items_list)/limit)
+    
+    return PaginatedInventory(page_number = page,total_pages=total,items=items)
 
 # Function to retrieve an inventory item by the ID of its associated product
 def get_inventory_by_product_id(db: Session, product_id: int):
-    return db.query(models.Inventory).filter(models.Inventory.product == product_id).first()
+    return db.query(models.Inventory).filter(models.Inventory.product == product_id)
 
 # Function to update an inventory item (TODO: Add parameters for update)
 def update_inventory(db: Session, inventory_id, update_data):
