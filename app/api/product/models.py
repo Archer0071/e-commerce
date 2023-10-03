@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Float, Integer, String
 from sqlalchemy.types import Enum as SQLAlchemyEnum
 from enum import Enum
-from db.base import Base
-from db.session import engine
+from app.db.base import Base
+from app.db.session import engine
 
 # Define an enumeration for product categories
 class Category(Enum):

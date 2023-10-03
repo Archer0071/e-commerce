@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from inventory import models
+from app.api.inventory import models
 
 
 # ---------------------------- Inventory Functions ---------------------------------------

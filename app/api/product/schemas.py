@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from models import Category
-from datetime import datetime
+from app.api.product.models import Category
 from typing import Optional
 
 # -------------------------- Product Schemas --------------------------------

@@ -1,7 +1,7 @@
 import os
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
-from product import models
+from app.api.product import models
 
 # ------------------------------ Product Functions ------------------------------------------
 

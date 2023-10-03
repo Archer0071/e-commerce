@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.types import Enum as SQLAlchemyEnum
-from enum import Enum, auto
+from enum import Enum
 from sqlalchemy.sql import func
-from db.base import Base
-from db.session import engine
+from app.db.base import Base
+from app.db.session import engine
 
 
 # Define an enumeration for inventory statuses
