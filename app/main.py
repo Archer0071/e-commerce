@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from api.product import endpoints as product_endpoints
 from api.inventory import endpoints as inventory_enpoints
+from api.sales import endpoints as sales_enpoints
 from db.session import SessionLocal
 
 app = FastAPI()
@@ -24,9 +25,9 @@ if environment != "production":
         print(f"Warning: The directory '{static_dir}' does not exist. Static files will not be served.")
 
 # Routes
-app.include_router(product_endpoints.router, prefix="/products", tags=["Products"])
-app.include_router(inventory_enpoints.router, prefix="/inventory", tags=["Inventory"])
-
+app.include_router(product_endpoints.router, tags=["Products"])
+app.include_router(inventory_enpoints.router, tags=["Inventory"])
+app.include_router(sales_enpoints.router, tags=["Sales"])
 
 if __name__ == '__main__':
     uvicorn.run(app)
