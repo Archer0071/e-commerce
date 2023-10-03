@@ -1,20 +1,9 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.types import Enum as SQLAlchemyEnum
-from enum import Enum
+from utils.enums import InventoryStatus
 from sqlalchemy.sql import func
 from db.base import Base
 from db.session import engine
-
-
-# Define an enumeration for inventory statuses
-class InventoryStatus(Enum):
-    AVAILABLE = "Available"
-    OUT_OF_STOCK = "Out of Stock"
-    IN_TRANSIT = "In Transit"
-    DAMAGED = "Damaged"
-    RESERVED = "Reserved"
-    DISCONTINUED = "Discontinued"
-    LOW = "Low"
 
 # Define the Inventory model (tracks the current state of inventory for each product)
 class Inventory(Base):

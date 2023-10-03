@@ -1,14 +1,9 @@
 from sqlalchemy import Column, Float, Integer, String
 from sqlalchemy.types import Enum as SQLAlchemyEnum
-from enum import Enum
+from utils.enums import Category
 from db.base import Base
 from db.session import engine
 
-# Define an enumeration for product categories
-class Category(Enum):
-    SMART_PHONES = "Smart Phones"
-    LAPTOPS = "Laptops"
-    IPHONES = "iPhones"
 
 # Define the Product model (represents products in the inventory)
 class Product(Base):

@@ -35,7 +35,6 @@ async def get_inventory_history_by_id(inventory_id:int,db: Session = Depends(get
         List[GetInventory]: List of inventory history items.
     """
     inventory = get_inventory_history_by_id(db,inventory_id)
-    print(inventory)
     if inventory is None:
         raise HTTPException(404, detail="Inventory not found")
 
