@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile,File
 from sqlalchemy.orm import Session
-from app.db.session import get_db
-from app.api.product.schemas import CreateProduct, GetProduct
-from app.api.inventory.schemas import CreateInventory
-from app.api.inventory.models import InventoryStatus
-from app.api.product import cruds
+from db.session import get_db
+from api.product.schemas import CreateProduct, GetProduct
+from api.inventory.schemas import CreateInventory
+from api.inventory.models import InventoryStatus
+from api.product import cruds
 
 
 

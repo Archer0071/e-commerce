@@ -2,9 +2,9 @@ import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.api.product import endpoints as product_endpoints
-from app.api.inventory import endpoints as inventory_enpoints
-from app.db.session import SessionLocal
+from api.product import endpoints as product_endpoints
+from api.inventory import endpoints as inventory_enpoints
+from db.session import SessionLocal
 
 app = FastAPI()
 

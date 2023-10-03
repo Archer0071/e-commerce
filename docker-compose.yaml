@@ -27,6 +27,8 @@ services:
       - ecommerce-network
     ports:
       - "8000:8000"
+    volumes:
+      - ./app:/app
 
 networks:
   ecommerce-network:

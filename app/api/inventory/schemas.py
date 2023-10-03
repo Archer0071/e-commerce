@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.api.inventory.models import InventoryStatus
+from api.inventory.models import InventoryStatus
 from datetime import datetime
 from typing import Optional
 
