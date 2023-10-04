@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException,Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db.session import get_db
@@ -27,12 +27,14 @@ def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
         SaleResponse: Created sale record.
     """
     # Fetch the corresponding inventory item
-    inventory = inventory_cruds.get_inventory_by_id(db,sale.inventory_id)
+    inventory = inventory_cruds.get_inventory_by_id(db, sale.inventory_id)
 
+    # Check if the inventory exists and has enough quantity for the sale
     if not inventory or inventory.quantity < sale.quantity_sold:
         raise HTTPException(status_code=400, detail="Invalid sale request")
-    
-    return sales_crud.create_sale(db=db,inventory=inventory, sale=sale)
+
+    # Create the sale and update inventory
+    return sales_crud.create_sale(db=db, inventory=inventory, sale=sale)
 
 # Endpoint to retrieve sales
 @router.get("/sales", response_model=List[SaleResponse])
@@ -56,8 +58,8 @@ def get_sales_data(
     Returns:
         List[SaleResponse]: List of sales records based on the specified filters.
     """
-    return sales_crud.get_all_sale(db,start_date,end_date,product_id,category)
-   
+    return sales_crud.get_all_sale(db, start_date, end_date, product_id, category)
+
 # Endpoint to analyze revenue on a daily basis
 @router.get("/sales/revenue/daily/")
 def analyze_daily_revenue(db: Session = Depends(get_db)):
@@ -72,6 +74,7 @@ def analyze_daily_revenue(db: Session = Depends(get_db)):
     """
     return sales_crud.analyze_daily_revenue(db)
 
+# Endpoint to analyze revenue on a weekly basis
 @router.get("/sales/revenue/weekly/")
 def analyze_weekly_revenue(db: Session = Depends(get_db)):
     """
