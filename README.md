@@ -36,7 +36,15 @@ To run the API using Docker Compose, follow these steps:
 
    This command will build the Docker images and start the containers in detached mode.
 
-4. **Access the API:**
+4. **Optional: Initialize Database:**
+
+   If you want to fill the database with test entries, run the `init_database.py` script inside the `app` folder.
+
+   ```bash
+   docker exec -it e-commerce_web_1 python app/init_database.py
+   ```
+
+5. **Access the API:**
 
    The API will be accessible at `http://localhost:8000`.
 
