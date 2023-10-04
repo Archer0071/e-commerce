@@ -2,13 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from db.session import get_db
 from api.inventory import cruds as inventory_cruds
-from api.inventory.schemas import GetInventory,UpdateInventory,PaginatedInventory
-
+from api.inventory.schemas import GetInventory, UpdateInventory, PaginatedInventory
 
 router = APIRouter()
 
 # ------------------------ Inventory Routes -----------------------------------------------------------
-
 
 @router.get("/inventory")
 async def get_all_inventory(db: Session = Depends(get_db)):
@@ -23,22 +21,26 @@ async def get_all_inventory(db: Session = Depends(get_db)):
     """
     return inventory_cruds.get_all_inventory(db)
 
-@router.get("/inventory_history/{inventory_id}",response_model=PaginatedInventory)
-async def get_inventory_history(inventory_id:int,
-                                page: int = Query(1, ge=1),
-                                per_page: int = Query(10, ge=1),
-                                db: Session = Depends(get_db)):
+@router.get("/inventory_history/{inventory_id}", response_model=PaginatedInventory)
+async def get_inventory_history(
+    inventory_id: int,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1),
+    db: Session = Depends(get_db)
+):
     """
     Get all inventory history items.
 
     Args:
+        inventory_id (int): ID of the inventory item.
+        page (int): Page number.
+        per_page (int): Items per page.
         db (Session): Database session.
 
     Returns:
-        List[GetInventory]: List of inventory history items.
+        PaginatedInventory: List of paginated inventory history items.
     """
-    
-    return inventory_cruds.get_inventory_history(db,inventory_id,page,per_page)
+    return inventory_cruds.get_inventory_history(db, inventory_id, page, per_page)
 
 @router.patch("/inventory/{inventory_id}", response_model=GetInventory)
 async def update_inventory(
