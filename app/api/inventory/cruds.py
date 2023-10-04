@@ -4,8 +4,6 @@ from sqlalchemy.orm import Session
 from api.inventory import models
 from api.inventory.schemas import GetInventoryHistory, PaginatedInventory
 
-# ---------------------------- Inventory Functions ---------------------------------------
-
 # Function to create a new inventory item
 def create_inventory(db: Session, inventory_data):
     """
