@@ -10,12 +10,16 @@ from datetime import datetime
 
 class Sale(Base):
     __tablename__ = "sales"
-
     id = Column(Integer, primary_key=True, index=True)
+    
+    # Modify ForeignKey to reference the correct column in Inventory
     inventory_id = Column(Integer, ForeignKey("inventory.id"))
+
     quantity_sold = Column(Integer)
     sale_date = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Define the relationship with Inventory
+    inventory = relationship('Inventory', back_populates='sales')
 
 # Try to create tables using the defined models and bind them to the engine
 try:

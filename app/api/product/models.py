@@ -15,8 +15,10 @@ class Product(Base):
     price = Column(Float, index=True)
     category = Column(SQLAlchemyEnum(Category), nullable=False)
     image = Column(String(255), index=True)
-# Define the relationship with Inventory
-    inventory = relationship('Inventory', cascade='all, delete-orphan')
+    
+    # Add a relationship to Inventory (One-to-One relationship)
+    inventory = relationship('Inventory', uselist=False ,cascade='all, delete-orphan', back_populates='product')
+
 
 # Try to create tables using the defined models and bind them to the engine
 try:

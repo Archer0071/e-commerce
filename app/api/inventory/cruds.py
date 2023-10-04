@@ -41,7 +41,7 @@ def get_inventory_history(db:Session, inventory_id,  page,per_page):
 
 # Function to retrieve an inventory item by the ID of its associated product
 def get_inventory_by_product_id(db: Session, product_id: int):
-    return db.query(models.Inventory).filter(models.Inventory.product == product_id)
+    return db.query(models.Inventory).filter(models.Inventory.product_id == product_id)
 
 # Function to update an inventory item (TODO: Add parameters for update)
 def update_inventory(db: Session, inventory_id, update_data):

@@ -27,24 +27,18 @@ async def create_product(product: CreateProduct, db: Session = Depends(get_db)):
     """
     
     new_product = product_cruds.create_product(db, product.model_dump())
-    inventory = CreateInventory(product=new_product.id,
-                                quantity=product.quantity,
-                                status=InventoryStatus.AVAILABLE)
+
+    if new_product is None:
+        raise HTTPException(400,detail="Could not create product")
     
-    product_id = inventory.product
-    product = product_cruds.get_product_by_id(db, product_id)
-
-    if not product:
-        raise HTTPException(404, detail=f"Product with ID {product_id} not found")
-
-    existing_inventory = inventory_cruds.get_inventory_by_product_id(db, product.id)
-    if existing_inventory:
-        raise HTTPException(400, detail=f"Inventory item for Product ID {product_id} already exists")
-
-     
+    inventory = CreateInventory(product_id=new_product.id,
+                                quantity=product.quantity,
+                                status=InventoryStatus.AVAILABLE)    
     new_inventory = inventory_cruds.create_inventory(db, inventory.model_dump())
+
     if new_inventory is None:
         raise HTTPException(400,detail="Could not create inventory")
+    
     return new_product
 
 @router.delete('/delete/{product_id}',response_model=GetProduct)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException,Query
-from sqlalchemy.orm import Session,joinedload
+from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db.session import get_db
 from api.sales.models import Sale
@@ -7,7 +7,9 @@ from api.product.models import Product
 from api.sales import crud as sales_crud
 from api.inventory import cruds as inventory_cruds
 from api.sales.schemas import SaleCreate, SaleResponse
-from datetime import date, timedelta,datetime
+from api.inventory.models import Inventory
+from datetime import date
+from utils.enums import Category
 from typing import List
 
 router = APIRouter()
@@ -36,20 +38,29 @@ def create_sale(sale: SaleCreate, db: Session = Depends(get_db)):
     return sales_crud.create_sale(db=db,inventory=inventory, sale=sale)
 
 # Endpoint to retrieve sales
-@router.get("/sales")
-def read_sale(db: Session = Depends(get_db)):
+@router.get("/sales", response_model=List[SaleResponse])
+def get_sales_data(
+    start_date: date = Query(None, description="Start date of the date range (YYYY-MM-DD)"),
+    end_date: date = Query(None, description="End date of the date range (YYYY-MM-DD)"),
+    product_id: int = Query(None, description="Filter by product ID"),
+    category: Category = Query(None, description="Filter by category"),
+    db: Session = Depends(get_db)
+):
     """
-    Retrieve a sale record.
+    Get sales data based on date range, product, and category filters.
 
     Args:
+        start_date (date): Start date of the date range (optional).
+        end_date (date): End date of the date range (optional).
+        product (str): Optional filter by product ID.
+        category (Category): Optional filter by category.
         db (Session): Database session.
 
     Returns:
-        SaleResponse: Sale record with the specified ID.
+        List[SaleResponse]: List of sales records based on the specified filters.
     """
-
-    return sales_crud.get_all_sale(db)
-
+    return sales_crud.get_all_sale(db,start_date,end_date,product_id,category)
+   
 # Endpoint to analyze revenue on a daily basis
 @router.get("/sales/revenue/daily/")
 def analyze_daily_revenue(db: Session = Depends(get_db)):
@@ -60,20 +71,11 @@ def analyze_daily_revenue(db: Session = Depends(get_db)):
         db (Session): Database session.
 
     Returns:
-        float: Daily revenue.
+        List[Dict[str, Union[str, float]]]: List of daily revenue entries.
     """
-    total_revenue = 0
-    today = date.today()
-    daily_sales = db.query(Sale).filter(func.DATE(Sale.sale_date) <= today).all()
-    for sale in daily_sales:
-        inventory_id  = sale.inventory_id
-        product = db.query(Product).filter(Product.id == inventory_id).first()
-        product_price = product.price
-        total_revenue += product_price
-    return {"revnue_daily":total_revenue}
+    return sales_crud.analyze_daily_revenue(db)
 
-# Endpoint to analyze revenue on a weekly basis
-@router.get("/sales/revenue/weekly/", response_model=float)
+@router.get("/sales/revenue/weekly/")
 def analyze_weekly_revenue(db: Session = Depends(get_db)):
     """
     Analyze weekly revenue.
@@ -82,16 +84,38 @@ def analyze_weekly_revenue(db: Session = Depends(get_db)):
         db (Session): Database session.
 
     Returns:
-        float: Weekly revenue.
+        List[Dict[str, Union[str, float]]]: List of weekly revenue entries.
     """
-    today = date.today()
-    start_of_week = today - timedelta(days=today.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
-    weekly_revenue = db.query(Sale).filter(Sale.date >= start_of_week, Sale.date <= end_of_week).with_entities(Sale.total_price).all()
-    return sum(weekly_revenue, 0.0)
+    try:
+        weekly_sales_data = (
+            db.query(
+                func.WEEK(Sale.sale_date).label("week"),
+                func.MIN(func.DATE(Sale.sale_date)).label("start_date"),
+                func.MAX(func.DATE(Sale.sale_date)).label("end_date"),
+                func.sum(Product.price * Sale.quantity_sold).label("total_revenue")
+            )
+            .join(Inventory, Inventory.id == Sale.inventory_id)
+            .join(Product, Product.id == Inventory.product_id)
+            .group_by(func.WEEK(Sale.sale_date))
+            .all()
+        )
+
+        result = [
+            {
+                "start_date": str(row.start_date),
+                "end_date": str(row.end_date),
+                "total_revenue": row.total_revenue
+            }
+            for row in weekly_sales_data
+        ]
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Endpoint to analyze revenue on a monthly basis
-@router.get("/sales/revenue/monthly/", response_model=float)
+@router.get("/sales/revenue/monthly/")
 def analyze_monthly_revenue(db: Session = Depends(get_db)):
     """
     Analyze monthly revenue.
@@ -100,17 +124,39 @@ def analyze_monthly_revenue(db: Session = Depends(get_db)):
         db (Session): Database session.
 
     Returns:
-        float: Monthly revenue.
+        List[Dict[str, Union[str, float]]]: List of monthly revenue entries.
     """
-    today = date.today()
-    start_of_month = today.replace(day=1)
-    end_of_month = today.replace(day=28) + timedelta(days=4)
-    end_of_month = end_of_month - timedelta(days=end_of_month.day)
-    monthly_revenue = db.query(Sale).filter(Sale.date >= start_of_month, Sale.date <= end_of_month).with_entities(Sale.total_price).all()
-    return sum(monthly_revenue, 0.0)
+    try:
+        monthly_sales_data = (
+            db.query(
+                func.MONTH(Sale.sale_date).label("month"),
+                func.MIN(func.DATE(Sale.sale_date)).label("start_date"),
+                func.MAX(func.DATE(Sale.sale_date)).label("end_date"),
+                func.sum(Product.price * Sale.quantity_sold).label("total_revenue")
+            )
+            .join(Inventory, Inventory.id == Sale.inventory_id)
+            .join(Product, Product.id == Inventory.product_id)
+            .group_by(func.MONTH(Sale.sale_date))
+            .all()
+        )
+
+        result = [
+            {
+                "month": row.month,
+                "start_date": str(row.start_date),
+                "end_date": str(row.end_date),
+                "total_revenue": row.total_revenue
+            }
+            for row in monthly_sales_data
+        ]
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Endpoint to analyze revenue on an annual basis
-@router.get("/sales/revenue/annual/", response_model=float)
+@router.get("/sales/revenue/annual/")
 def analyze_annual_revenue(db: Session = Depends(get_db)):
     """
     Analyze annual revenue.
@@ -119,67 +165,33 @@ def analyze_annual_revenue(db: Session = Depends(get_db)):
         db (Session): Database session.
 
     Returns:
-        float: Annual revenue.
+        List[Dict[str, Union[str, float]]]: List of annual revenue entries.
     """
-    today = date.today()
-    start_of_year = today.replace(month=1, day=1)
-    end_of_year = today.replace(month=12, day=31)
-    annual_revenue = db.query(Sale).filter(Sale.date >= start_of_year, Sale.date <= end_of_year).with_entities(Sale.total_price).all()
-    return sum(annual_revenue, 0.0)
+    try:
+        annual_sales_data = (
+            db.query(
+                func.YEAR(Sale.sale_date).label("year"),
+                func.MIN(func.DATE(Sale.sale_date)).label("start_date"),
+                func.MAX(func.DATE(Sale.sale_date)).label("end_date"),
+                func.sum(Product.price * Sale.quantity_sold).label("total_revenue")
+            )
+            .join(Inventory, Inventory.id == Sale.inventory_id)
+            .join(Product, Product.id == Inventory.product_id)
+            .group_by(func.YEAR(Sale.sale_date))
+            .all()
+        )
 
-# Endpoint to compare revenue across different periods and categories (Example: Weekly revenue for different product categories)
-@router.get("/sales/revenue/compare/", response_model=dict)
-def compare_revenue_periods_and_categories(db: Session = Depends(get_db)):
-    """
-    Compare revenue across different periods and categories.
+        result = [
+            {
+                "year": row.year,
+                "start_date": str(row.start_date),
+                "end_date": str(row.end_date),
+                "total_revenue": row.total_revenue
+            }
+            for row in annual_sales_data
+        ]
 
-    Args:
-        db (Session): Database session.
+        return result
 
-    Returns:
-        dict: Dictionary with keys as periods/categories and values as revenue.
-    """
-    # Example: You can customize this based on your actual data model and requirements
-    comparison_data = {
-        "Week1": db.query(Sale).filter(Sale.date >= date(2023, 1, 1), Sale.date <= date(2023, 1, 7)).with_entities(Sale.total_price).all(),
-        "Week2": db.query(Sale).filter(Sale.date >= date(2023, 1, 8), Sale.date <= date(2023, 1, 14)).with_entities(Sale.total_price).all(),
-        "Category1": db.query(Sale).filter(Sale.category == "Category1").with_entities(Sale.total_price).all(),
-        "Category2": db.query(Sale).filter(Sale.category == "Category2").with_entities(Sale.total_price).all(),
-    }
-
-    # Summing up revenue for each period/category
-    result = {key: sum(value, 0.0) for key, value in comparison_data.items()}
-    return result
-
-# Endpoint to provide sales data by date range, product, and category
-@router.get("/sales/data/", response_model=List[SaleResponse])
-def get_sales_data(
-    start_date: date = Query(..., description="Start date of the date range"),
-    end_date: date = Query(..., description="End date of the date range"),
-    product: str = Query(None, description="Filter by product"),
-    category: str = Query(None, description="Filter by category"),
-    db: Session = Depends(get_db)
-):
-    """
-    Get sales data based on date range, product, and category filters.
-
-    Args:
-        start_date (date): Start date of the date range.
-        end_date (date): End date of the date range.
-        product (str): Optional filter by product.
-        category (str): Optional filter by category.
-        db (Session): Database session.
-
-    Returns:
-        List[SaleResponse]: List of sales records based on the specified filters.
-    """
-    query = db.query(Sale).filter(Sale.date >= start_date, Sale.date <= end_date)
-
-    if product:
-        query = query.filter(Sale.product == product)
-
-    if category:
-        query = query.filter(Sale.category == category)
-
-    sales_data = query.all()
-    return sales_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

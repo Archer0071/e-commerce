@@ -11,11 +11,11 @@ class CreateInventory(BaseModel):
     schema for creating a new inventory item.
 
     Attributes:
-        product (int): ID of the associated product.
+        product_id (int): ID of the associated product.
         quantity (int): Initial quantity of the inventory item.
         status (InventoryStatus): Status of the inventory item.
     """
-    product: int
+    product_id: int
     quantity: int
     status: InventoryStatus
 
@@ -31,7 +31,7 @@ class GetInventory(BaseModel):
         status (InventoryStatus): Status of the inventory item.
     """
     id: int
-    product: int
+    product_id: int
     quantity: int
     last_updated: datetime
     status: InventoryStatus
