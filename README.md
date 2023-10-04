@@ -1,4 +1,4 @@
-# E-Commerce API
+# E-Commerce API 🛒🚀
 
 This repository contains the back-end API for an e-commerce application. The API is designed to power a web admin dashboard for e-commerce managers, providing detailed insights into sales, revenue, and inventory status, as well as allowing the registration of new products. The implementation is done using Python and FastAPI.
 
@@ -86,4 +86,4 @@ The API provides the following endpoints:
 
 Feel free to explore and use these endpoints to manage your e-commerce-inventory application efficiently.
 
-For any issues or inquiries, please contact [adilking0071@gmail.com].
+For any issues or inquiries, please contact [adilking0071@gmail.com]. 📧
