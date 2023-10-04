@@ -2,12 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db.session import get_db
-from api.sales.models import Sale
-from api.product.models import Product
 from api.sales import crud as sales_crud
 from api.inventory import cruds as inventory_cruds
 from api.sales.schemas import SaleCreate, SaleResponse
-from api.inventory.models import Inventory
 from datetime import date
 from utils.enums import Category
 from typing import List
@@ -86,33 +83,7 @@ def analyze_weekly_revenue(db: Session = Depends(get_db)):
     Returns:
         List[Dict[str, Union[str, float]]]: List of weekly revenue entries.
     """
-    try:
-        weekly_sales_data = (
-            db.query(
-                func.WEEK(Sale.sale_date).label("week"),
-                func.MIN(func.DATE(Sale.sale_date)).label("start_date"),
-                func.MAX(func.DATE(Sale.sale_date)).label("end_date"),
-                func.sum(Product.price * Sale.quantity_sold).label("total_revenue")
-            )
-            .join(Inventory, Inventory.id == Sale.inventory_id)
-            .join(Product, Product.id == Inventory.product_id)
-            .group_by(func.WEEK(Sale.sale_date))
-            .all()
-        )
-
-        result = [
-            {
-                "start_date": str(row.start_date),
-                "end_date": str(row.end_date),
-                "total_revenue": row.total_revenue
-            }
-            for row in weekly_sales_data
-        ]
-
-        return result
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return sales_crud.analyze_weekly_revenue(db)
 
 # Endpoint to analyze revenue on a monthly basis
 @router.get("/sales/revenue/monthly/")
@@ -126,34 +97,7 @@ def analyze_monthly_revenue(db: Session = Depends(get_db)):
     Returns:
         List[Dict[str, Union[str, float]]]: List of monthly revenue entries.
     """
-    try:
-        monthly_sales_data = (
-            db.query(
-                func.MONTH(Sale.sale_date).label("month"),
-                func.MIN(func.DATE(Sale.sale_date)).label("start_date"),
-                func.MAX(func.DATE(Sale.sale_date)).label("end_date"),
-                func.sum(Product.price * Sale.quantity_sold).label("total_revenue")
-            )
-            .join(Inventory, Inventory.id == Sale.inventory_id)
-            .join(Product, Product.id == Inventory.product_id)
-            .group_by(func.MONTH(Sale.sale_date))
-            .all()
-        )
-
-        result = [
-            {
-                "month": row.month,
-                "start_date": str(row.start_date),
-                "end_date": str(row.end_date),
-                "total_revenue": row.total_revenue
-            }
-            for row in monthly_sales_data
-        ]
-
-        return result
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return sales_crud.analyze_monthly_revenue(db)
 
 # Endpoint to analyze revenue on an annual basis
 @router.get("/sales/revenue/annual/")
@@ -167,31 +111,4 @@ def analyze_annual_revenue(db: Session = Depends(get_db)):
     Returns:
         List[Dict[str, Union[str, float]]]: List of annual revenue entries.
     """
-    try:
-        annual_sales_data = (
-            db.query(
-                func.YEAR(Sale.sale_date).label("year"),
-                func.MIN(func.DATE(Sale.sale_date)).label("start_date"),
-                func.MAX(func.DATE(Sale.sale_date)).label("end_date"),
-                func.sum(Product.price * Sale.quantity_sold).label("total_revenue")
-            )
-            .join(Inventory, Inventory.id == Sale.inventory_id)
-            .join(Product, Product.id == Inventory.product_id)
-            .group_by(func.YEAR(Sale.sale_date))
-            .all()
-        )
-
-        result = [
-            {
-                "year": row.year,
-                "start_date": str(row.start_date),
-                "end_date": str(row.end_date),
-                "total_revenue": row.total_revenue
-            }
-            for row in annual_sales_data
-        ]
-
-        return result
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return sales_crud.analyze_annual_revenue(db)
