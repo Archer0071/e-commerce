@@ -5,9 +5,22 @@ from utils.enums import Category
 from db.base import Base
 from db.session import engine
 
-
 # Define the Product model (represents products in the inventory)
 class Product(Base):
+    """
+    Represents a product in the inventory.
+
+    Attributes:
+        id (int): Primary key.
+        name (str): Name of the product.
+        description (str): Description of the product.
+        price (float): Price of the product.
+        category (Enum): Category of the product (e.g., ELECTRONICS, CLOTHING).
+        image (str): Path to the product image.
+
+    Relationships:
+        - inventory: One-to-One relationship with the associated inventory item.
+    """
     __tablename__ = "products"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), index=True)
@@ -17,7 +30,7 @@ class Product(Base):
     image = Column(String(255), index=True)
     
     # Add a relationship to Inventory (One-to-One relationship)
-    inventory = relationship('Inventory', uselist=False ,cascade='all, delete-orphan', back_populates='product')
+    inventory = relationship('Inventory', uselist=False, cascade='all, delete-orphan', back_populates='product')
 
 
 # Try to create tables using the defined models and bind them to the engine

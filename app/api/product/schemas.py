@@ -6,7 +6,7 @@ from typing import Optional
 
 class CreateProduct(BaseModel):
     """
-    schema for creating a new product.
+    Schema for creating a new product.
 
     Attributes:
         name (str): Name of the product.
@@ -24,7 +24,7 @@ class CreateProduct(BaseModel):
 
 class GetProduct(BaseModel):
     """
-    schema for getting details of a product.
+    Schema for getting details of a product.
 
     Attributes:
         id (int): Unique identifier for the product.
@@ -41,4 +41,3 @@ class GetProduct(BaseModel):
     price: float
     category: Category
     image: Optional[str] = None
-    
