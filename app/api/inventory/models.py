@@ -8,25 +8,48 @@ from db.session import engine
 
 # Define the Inventory model (tracks the current state of inventory for each product)
 class Inventory(Base):
+    """
+    Represents the inventory for a product.
+
+    Attributes:
+        id (int): Primary key.
+        product_id (int): Foreign key referencing the associated product.
+        quantity (int): Current quantity of the product in the inventory.
+        last_updated (DateTime): Timestamp of the last update to the inventory.
+        status (Enum): Status of the inventory item (e.g., IN_STOCK, OUT_OF_STOCK).
+
+    Relationships:
+        - product: One-to-One relationship with the associated product.
+        - sales: One-to-Many relationship with sales made for this product.
+        - history: One-to-Many relationship with historical changes in inventory.
+    """
     __tablename__ = "inventory"
     id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(ForeignKey("products.id", ondelete='CASCADE'), unique=True)  # Ensure unique constraint for one-to-one
+    product_id = Column(ForeignKey("products.id", ondelete='CASCADE'), unique=True)
     quantity = Column(Integer)
     last_updated = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
     status = Column(SQLAlchemyEnum(InventoryStatus), nullable=False)
 
-    # Define the relationship with Product
     product = relationship('Product', back_populates='inventory')
-
-    # Define the relationship with Sale (One-to-Many relationship)
     sales = relationship('Sale', back_populates='inventory')
-
-    # Define the relationship with InventoryHistory (One-to-Many relationship)
     history = relationship('InventoryHistory', back_populates='inventory')
 
 
 # Define the InventoryHistory model (logs historical changes in inventory)
 class InventoryHistory(Base):
+    """
+    Represents the historical changes in inventory.
+
+    Attributes:
+        id (int): Primary key.
+        inventory_id (int): Foreign key referencing the associated inventory item.
+        quantity (int): Quantity at the time of the historical record.
+        last_updated (DateTime): Timestamp of the historical record.
+        status (Enum): Status of the inventory item at the time of the historical record.
+
+    Relationships:
+        - inventory: Many-to-One relationship with the associated inventory item.
+    """
     __tablename__ = "inventory_history"
     id = Column(Integer, primary_key=True, index=True)
     inventory_id = Column(ForeignKey("inventory.id", ondelete='CASCADE'))
@@ -34,7 +57,6 @@ class InventoryHistory(Base):
     last_updated = Column(DateTime(timezone=True), default=func.now())
     status = Column(SQLAlchemyEnum(InventoryStatus), nullable=False)
 
-    # Define the relationship with Inventory
     inventory = relationship('Inventory', back_populates='history')
 
 
